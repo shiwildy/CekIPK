@@ -1,0 +1,16 @@
+@media screen and (max-width: 767px) {
+    /* Sembunyikan semua konten pada body awokwaokwaokaw */
+    body * {
+        display: none;
+    }
+
+    body::before {
+        content: "Mohon maaf, saat ini website ini hanya mendukung ukuran Desktop maupun Tablet.";
+        font-size: 24px;
+        color: red;
+        display: block;
+        margin: 20px;
+        text-align: center;
+        font-weight: bold;
+    }
+}
