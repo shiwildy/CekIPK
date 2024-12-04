@@ -1,13 +1,15 @@
 window.kode = `<tr>
   <td><input type="text" class="matkul w-full p-2 border-b border-gray-300 rounded text-center"></td>
   <td><input type="tel" class="sks w-full p-2 border-b border-gray-300 rounded text-center" value="" min="0" max="50"></td>
+  <td><input type="tel" class="kt w-full p-2 border-b border-gray-300 rounded text-center" value="" min="0" max="50"></td>
   <td><input type="tel" class="tugas w-full p-2 border-b border-gray-300 rounded text-center" value="" min="0" max="100"></td>
   <td><input type="tel" class="uts w-full p-2 border-b border-gray-300 rounded text-center" value="" min="0" max="100"></td>
   <td><input type="tel" class="uas w-full p-2 border-b border-gray-300 rounded text-center" value="" min="0" max="100"></td>
   <td>
     <select class="sistem-hitung w-full p-2 border-b border-gray-300 rounded text-center">
-	  <option value="1">TM 30%, UTS 30%, UAS 40%</option>
-      <option value="2">TM 50%, UTS 20%, UAS 30%</option>
+	  <option value="1">TM/Prak 30%, UTS 30%, UAS 40%</option>
+      <option value="2">TM/Prak 50%, UTS 20%, UAS 30%</option>
+      <option value="2">KT 10%, TM/Prak 30%, UTS 30%, UAS 30%</option>
     </select>
   </td>
   <td class="nilai p-2 text-center"></td>
@@ -18,19 +20,19 @@ window.kode = `<tr>
 </tr>`;
 
 function tambahkan() {
-	$('table#nilai tbody').append(window.kode);
+    $('table#nilai tbody').append(window.kode);
 }
 
 function ValidNIM() {
-	var A = document.getElementById("nim").value;
-	if (isNaN(A)) {
-		Swal.fire({
-			icon: 'error',
-			title: 'Oops...',
-			text: 'NIM harus berupa angka!',
-			confirmButtonColor: '#db2e2e',
-		});
-	}
+    var A = document.getElementById("nim").value;
+    if (isNaN(A)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'NIM harus berupa angka!',
+            confirmButtonColor: '#db2e2e',
+        });
+    }
 }
 
 function validateInput(inputElement) {
@@ -71,6 +73,7 @@ function hitungipk() {
 
     $('table#nilai tbody tr').each(function () {
         var sks = parseInt($(this).find('.sks').val());
+        var kt = parseInt($(this).find('.kt').val());
         var tugas = parseFloat($(this).find('.tugas').val().replace(',', '.'));
         var uts = parseFloat($(this).find('.uts').val().replace(',', '.'));
         var uas = parseFloat($(this).find('.uas').val().replace(',', '.'));
@@ -79,8 +82,10 @@ function hitungipk() {
         var nilaiAkhir;
         if (sistem == '1') {
             nilaiAkhir = (tugas * 0.3) + (uts * 0.3) + (uas * 0.4);
-        } else {
+        } else if (sistem == '2') {
             nilaiAkhir = (tugas * 0.5) + (uts * 0.2) + (uas * 0.3);
+        } else if (sistem == '3') {
+            nilaiAkhir = (kt * 0.1) + (tugas * 0.3) + (uts * 0.3) + (uas * 0.3); // tambah nilai kelas tutor
         }
 
         var roundedNilaiAkhir = Math.round(nilaiAkhir * 10) / 10;
@@ -122,7 +127,7 @@ function hitungipk() {
     });
 
     var ipk = total_poin / total_sks;
-	console.log(total_poin)
+    console.log(total_poin)
 
     var selamat;
     if (ipk.toFixed(1) >= 4) {
@@ -151,109 +156,112 @@ function hitungipk() {
 }
 
 function reset() {
-	Swal.fire({
-		title: 'Anda yakin?',
-		text: "Anda akan mereset semua data yang telah dimasukan!",
-		icon: 'warning',
-		showCancelButton: true,
-		confirmButtonColor: '#1fad4c',
-		cancelButtonColor: '#db2e2e',
-		confirmButtonText: 'Ya, Dong',
-		cancelButtonText: 'Ga jadi'
-	}).then((result) => {
-		if (result.isConfirmed) {
-			$('table#nilai tbody tr').remove();
-			$('table#nilai tbody').append(window.kode);
-			$('#nama, #nim').val('');
-			$('#result').hide();
+    Swal.fire({
+        title: 'Anda yakin?',
+        text: "Anda akan mereset semua data yang telah dimasukan!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#1fad4c',
+        cancelButtonColor: '#db2e2e',
+        confirmButtonText: 'Ya, Dong',
+        cancelButtonText: 'Ga jadi'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $('table#nilai tbody tr').remove();
+            $('table#nilai tbody').append(window.kode);
+            $('#nama, #nim').val('');
+            $('#result').hide();
 
-			Swal.fire({
-				title: 'Reset!',
-				text: 'Semua input telah direset.',
-				icon: 'success',
-				confirmButtonColor: '#1fad4c',
-			});
-		}
-	});
+            Swal.fire({
+                title: 'Reset!',
+                text: 'Semua input telah direset.',
+                icon: 'success',
+                confirmButtonColor: '#1fad4c',
+            });
+        }
+    });
 }
 
 $(document).ready(function () {
-	$('.container').hide().fadeIn('slow');
-	$('table#nilai').on('keydown keyup change focus', '.sks, .tugas, .uts, .uas, .sistem-hitung', function (e) {
-		var tugas = $(this).closest('tr').find('.tugas').val().replace(',', '.'); // replace , jadi . karna js ga baca , sbg koma di angka
-		var uts = $(this).closest('tr').find('.uts').val().replace(',', '.');
-		var uas = $(this).closest('tr').find('.uas').val().replace(',', '.');
-		var sistem = $(this).closest('tr').find('.sistem-hitung').val();
+    $('.container').hide().fadeIn('slow');
+    $('table#nilai').on('keydown keyup change focus', '.sks, .tugas, .uts, .uas, .sistem-hitung', function (e) {
+        var tugas = $(this).closest('tr').find('.tugas').val().replace(',', '.'); // replace , jadi . karna js ga baca , sbg koma di angka
+        var uts = $(this).closest('tr').find('.uts').val().replace(',', '.');
+        var uas = $(this).closest('tr').find('.uas').val().replace(',', '.');
+        var kt = $(this).closest('tr').find('.kt').val().replace(',', '.');
+        var sistem = $(this).closest('tr').find('.sistem-hitung').val();
 
-		var nilaiAkhir;
-		if (sistem == '1') {
-			nilaiAkhir = (tugas * 0.3) + (uts * 0.3) + (uas * 0.4);
-		} else {
-			nilaiAkhir = (tugas * 0.5) + (uts * 0.2) + (uas * 0.3);
-		}
+        var nilaiAkhir;
+        if (sistem == '1') {
+            nilaiAkhir = (tugas * 0.3) + (uts * 0.3) + (uas * 0.4);
+        } else if (sistem == '2') {
+            nilaiAkhir = (tugas * 0.5) + (uts * 0.2) + (uas * 0.3);
+        } else if (sistem == '3') {
+            nilaiAkhir = (kt * 0.1) + (tugas * 0.3) + (uts * 0.3) + (uas * 0.3); // tambah nilai kelas tutor
+        }
 
-		var roundedNilaiAkhir = Math.round(nilaiAkhir * 10) / 10;
-		var formattedNilaiAkhir = roundedNilaiAkhir.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+        var roundedNilaiAkhir = Math.round(nilaiAkhir * 10) / 10;
+        var formattedNilaiAkhir = roundedNilaiAkhir.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
-		var nilai = $(this).closest('tr').find('.nilai');
-		nilai.html(formattedNilaiAkhir);
+        var nilai = $(this).closest('tr').find('.nilai');
+        nilai.html(formattedNilaiAkhir);
 
-		var grade = $(this).closest('tr').find('.grade');
-		if (roundedNilaiAkhir >= 80 && roundedNilaiAkhir <= 100) {
-		    grade.html('A');
-		} else if (roundedNilaiAkhir >= 73 && roundedNilaiAkhir < 80) {
-		    grade.html('B+');
-		} else if (roundedNilaiAkhir >= 66 && roundedNilaiAkhir < 73) {
-		    grade.html('B');
-		} else if (roundedNilaiAkhir >= 58 && roundedNilaiAkhir < 66) {
-		    grade.html('C+');
-		} else if (roundedNilaiAkhir >= 51 && roundedNilaiAkhir < 58) {
-		    grade.html('C');
-		} else if (roundedNilaiAkhir >= 41 && roundedNilaiAkhir < 51) {
-		    grade.html('D');
-		} else if (roundedNilaiAkhir >= 0 && roundedNilaiAkhir < 41) {
-		    grade.html('E');
-		} else {
-		    grade.html('F');
-		}
+        var grade = $(this).closest('tr').find('.grade');
+        if (roundedNilaiAkhir >= 80 && roundedNilaiAkhir <= 100) {
+            grade.html('A');
+        } else if (roundedNilaiAkhir >= 73 && roundedNilaiAkhir < 80) {
+            grade.html('B+');
+        } else if (roundedNilaiAkhir >= 66 && roundedNilaiAkhir < 73) {
+            grade.html('B');
+        } else if (roundedNilaiAkhir >= 58 && roundedNilaiAkhir < 66) {
+            grade.html('C+');
+        } else if (roundedNilaiAkhir >= 51 && roundedNilaiAkhir < 58) {
+            grade.html('C');
+        } else if (roundedNilaiAkhir >= 41 && roundedNilaiAkhir < 51) {
+            grade.html('D');
+        } else if (roundedNilaiAkhir >= 0 && roundedNilaiAkhir < 41) {
+            grade.html('E');
+        } else {
+            grade.html('F');
+        }
 
-	}).on('click', '.tombolhapus', function () {
-		Swal.fire({
-			title: 'Anda yakin?',
-			text: "Anda akan menghapus mata kuliah ini!",
-			icon: 'warning',
-			showCancelButton: true,
-			confirmButtonColor: '#1fad4c',
-			cancelButtonColor: '#db2e2e',
-			confirmButtonText: 'Ya, hapus!',
-			cancelButtonText: 'Batal'
-		}).then((result) => {
-			if (result.isConfirmed) {
-				$(this).closest('tr').slideUp('slow', function () {
-					$(this).remove();
-				});
-				Swal.fire({
-					title: 'Terhapus!',
-					text: 'Matakuliah berhasil dihapus.',
-					icon: 'success',
-					confirmButtonColor: '#1fad4c',
-				});
-			}
-		});
-	});
+    }).on('click', '.tombolhapus', function () {
+        Swal.fire({
+            title: 'Anda yakin?',
+            text: "Anda akan menghapus mata kuliah ini!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#1fad4c',
+            cancelButtonColor: '#db2e2e',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $(this).closest('tr').slideUp('slow', function () {
+                    $(this).remove();
+                });
+                Swal.fire({
+                    title: 'Terhapus!',
+                    text: 'Matakuliah berhasil dihapus.',
+                    icon: 'success',
+                    confirmButtonColor: '#1fad4c',
+                });
+            }
+        });
+    });
 
-	$('.sks, .tugas, .uts, .uas').focus(function () {
-		var $this = $(this);
-		$this.select();
+    $('.sks, .tugas, .uts, .uas').focus(function () {
+        var $this = $(this);
+        $this.select();
 
-		$this.mouseup(function () {
-			$this.unbind("mouseup");
-			return false;
-		});
-	});
+        $this.mouseup(function () {
+            $this.unbind("mouseup");
+            return false;
+        });
+    });
 
-	// update: menampahkan tbody
-	$('table#nilai').on('input', 'tbody .tugas, tbody .uts, tbody .uas', function () {
-		validateInput(this); // validasi nilai yang diinput
-	});
+    // update: menampahkan tbody
+    $('table#nilai').on('input', 'tbody .tugas, tbody .uts, tbody .uas', function () {
+        validateInput(this); // validasi nilai yang diinput
+    });
 });
